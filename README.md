@@ -10,9 +10,9 @@ We have shown the metric prediction resuts of all methods on all datasets, and t
 
 # Datasets
 
-For AIops18, please refer to https://github.com/BEbillionaireUSD/Maat
+For AIops18, please refer to AIOps18.csv in Folder /Dataset or https://github.com/BEbillionaireUSD/Maat
 
-For GAIA, please refer to https://github.com/CloudWise-OpenSource/GAIA-DataSet/tree/main/Companion_Data
+For GAIA, please refer to to GAIA.csv in Folder /Dataset or https://github.com/CloudWise-OpenSource/GAIA-DataSet/tree/main/Companion_Data
 
 SoN and Med are coming soon, and we present a toy dataset (the illustration expriment in the motivation section of the paper), similar to SoN and Med, except that the data volume is smaller: https://figshare.com/s/92cef85e44f2223d2112
 
