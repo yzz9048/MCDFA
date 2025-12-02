@@ -4,10 +4,6 @@
 
 We have provided the backbone of CDFA (backbone.py) and the diffusion process (gaussian_diffusion.py) here.
 
-# Metric prediction results
-
-We have shown the metric prediction resuts of all methods on all datasets, and they are named by "{model_name}-{dataset_name}" primarily. An overall display is provided in the PDF file.
-
 # Datasets
 
 For AIops18, please refer to AIOps18.csv in Folder /Dataset or https://github.com/BEbillionaireUSD/Maat
