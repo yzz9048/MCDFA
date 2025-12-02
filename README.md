@@ -1,8 +1,8 @@
-# CDFA
+# MCDFA
 
 # For now, only the core code is displayed and the complete code is coming soon.
 
-We have provided the backbone of CDFA (backbone.py) and the diffusion process (gaussian_diffusion.py) here.
+We have provided the backbone of MCDFA (backbone.py) and the diffusion process (gaussian_diffusion.py) here.
 
 # Datasets
 
