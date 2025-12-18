@@ -10,7 +10,7 @@ For AIops18, please refer to AIOps18.csv in Folder /Dataset or https://github.co
 
 For GAIA, please refer to to GAIA.csv in Folder /Dataset or https://github.com/CloudWise-OpenSource/GAIA-DataSet/tree/main/Companion_Data
 
-SoN and Med are coming soon, and we present a toy dataset (the illustration expriment in the motivation section of the paper), similar to SoN and Med, except that the data volume is smaller: https://figshare.com/s/92cef85e44f2223d2112
+SoN and Med are coming soon, and we present a toy dataset (the illustration expriment in the motivation section of the paper), similar to SoN and Med, except that the data volume is smaller: https://drive.google.com/file/d/1rwlstJx3U4HGWbvKRUAAP0c0_xiPS8ng/view?usp=drive_link
 
 Specifically, the json files in the data warehouse are the raw data collected by tools, i.e.., Prometheus and k6, and the csv files are extracted from json files. Metrics are collected at intervals of 10 seconds. Therefore, RPS data can perform average aggregation at intervals of 10 seconds as guiding condition data. We have provided the specific number of requests per second. Readers can handle and generate other conditional data by themselves.
 
