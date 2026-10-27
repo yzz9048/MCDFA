@@ -1,0 +1,103 @@
+# Paper reproduction defaults:
+# Shayesteh et al., "Automated Concept Drift Handling for Fault Prediction in
+# Edge Clouds Using Reinforcement Learning", IEEE TNSM 2022.
+#
+# Run:
+#   python main.py --dataset sn --smoke-test
+#   python main.py --dataset sn
+#
+# The smoke-test switch (CLI or smoke_test: true) overrides the expensive
+# settings below at load time; paper-scale values remain the defaults.
+
+seed: 12345
+device: auto
+output_root: RESULTS
+dataset: sn
+active_kpi: cpu
+
+datasets:
+  sn: {data_root: Data/sn.csv}
+  media: {data_root: Data/media.csv}
+  maat: {data_root: Data/AIOps-R.csv}
+  aiops: {data_root: Data/AIOps-R.csv}
+  gaia: {data_root: Data/GAIA-R.csv}
+
+predictor:
+  input_window: 12          # paper: input window 12
+  forecast_horizon: 6       # paper: output window 6
+  rfe_features: 10          # paper: 10 RFE-selected features
+  conv1_out: 32
+  conv2_out: 64
+  kernel_size: 3
+  pool_size: 2
+  dense1: 128
+  dropout: 0.1
+  epochs: 30                # within the paper's searched 8..256 range
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0
+  val_fraction: 0.2         # early-stopping tail inside the 60% train split
+  patience: 8
+
+split:
+  train: 0.6
+  validation: 0.2
+  test: 0.2
+  rl_stream_fraction: 0.8   # first 80% of validation: detector/adaptation
+                            # tail 20%: fixed validation accuracy holdout
+
+detector:
+  # Fixed accuracy threshold on natural data; no synthetic drift injection.
+  rolling_window: 100
+  accuracy_threshold: 0.7
+  cooldown: 100
+  min_events: 5
+  max_events: 12
+  # Effective offline minimum is max(min_post_windows, data_collector.D0).
+  min_post_windows: 1000
+  fallback_to_accuracy_minima: true
+
+# Paper Table II operator requirement sets {time s, resource MB, accuracy}.
+kpi_sets:
+  - {name: congestion,  time: 50.0, resource: 10.0, accuracy: 0.86}
+  - {name: hdd,         time: 25.0, resource:  5.0, accuracy: 0.83}
+  - {name: packet_loss, time: 15.0, resource:  9.0, accuracy: 0.89}
+  - {name: cpu,         time: 10.0, resource:  7.0, accuracy: 0.90}
+
+reward:
+  k1: 0.8
+  k2: 0.1
+  k3: 0.1
+
+qlearning:
+  # The paper does not publish alpha, gamma, replay size/capacity, or
+  # collector episode length; these are explicit defaults.
+  alpha: 0.1
+  gamma: 0.9
+  replay_size: 64
+  replay_capacity: 2000
+  selector_episodes: 12000      # paper: 12,000
+  collector_episodes: 20000     # paper: 20,000
+  explore_episodes: 2000        # paper: epsilon = 1 for first 2,000
+  decay_every: 200              # paper: -0.1 every 200
+  decay_amount: 0.1
+  min_epsilon: 0.1              # paper: minimum 0.1
+  collector_episode_length: 10
+  selector_data_size: max
+
+data_collector:
+  D0: 1000                      # paper: 1,000
+  Dr: 7000                      # paper: 7,000
+  interval: 100                 # paper: interval 100
+  deployment_initial_size: 4000
+
+adaptation:
+  epochs: 30
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0
+  cache: true
+  max_data_size: 7000
+  # C measurement: deterministic data+model+activation footprint (default)
+  # or process RSS / CUDA peak. The paper leaves this unspecified.
+  resource_metric: footprint

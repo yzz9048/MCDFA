@@ -1,0 +1,84 @@
+model:
+  target: Models.sagn.model.SAGN
+  params:
+    seq_length: 30 # 同时要改后面的window
+    DeltaT: 10 # 同args.pred_len
+    feature_size: 28 # rps + 微服务数量 + label
+    node_feature_count: 2 # [service metric, RPS]
+    hidden_dim: 64
+    graph_conv_dim: 32
+    graph_embed_dim: 32
+    graph_steps: 2
+    gumbel_temperature: 0.5
+    gumbel_temperature_min: 0.1
+    gumbel_anneal_steps: 2500
+    eval_temperature: 0.1
+    graph_l1: 0.0
+    teacher_forcing: 1.0 # scheduled sampling for free-running inference
+    teacher_forcing_decay_steps: 1250
+    residual_output: True # predict deltas over the last observed value
+    pool: # GNN pool from SAGN Section 4.1.2 / 4.2.2
+      size: 20
+      snapshot_interval: 250
+      validation_windows: 256
+    online:
+      enabled: True
+      learning_rate: 1.0e-3
+      epochs: 1
+      window_batch: 8 # update every 8 observed samples
+      warmup: 64
+      validation_size: 64 # dynamic validation set V*
+      pool_update: True
+    residual_score: # unsupervised detection score, fitted on label-free validation residuals
+      aggregation: max
+      top_k: 3
+      temperature: 1.0
+      min_scale: 1.0e-3
+      steps: 10 # observed one-step residuals in the rolling buffer
+      calibration_windows: 2048
+      baseline_windows: 512 # causal rolling baseline for residual score
+      baseline_min: 32
+
+solver:
+  base_lr: 1.0e-3
+  max_epochs: 3000
+  results_folder: ./Checkpoints_sn_sagn
+  gradient_accumulate_every: 1
+  save_cycle: 300
+
+  scheduler:
+    target: engine.lr_sch.ReduceLROnPlateauWithWarmup
+    params:
+      factor: 0.5
+      patience: 400
+      min_lr: 1.0e-6
+      threshold: 1.0e-1
+      threshold_mode: rel
+      warmup_lr: 1.0e-3
+      warmup: 100
+      verbose: False
+
+dataloader:
+  target: Utils.Data_utils.real_datasets.CustomDataset
+  params:
+    name: sn
+    proportion: 0.6  # chronological train targets
+    validation_proportion: 0.2  # next 20%; final 20% is test
+    data_root: ./Data/sn.csv
+    window: 30  # seq_length
+    DeltaT: 1  # sliding-window stride; model DeltaT remains the horizon
+    save2npy: True
+    neg_one_to_one: True
+    feature_scaling: train_minmax
+    seed: 123
+    style: separate
+    distribution: geometric
+  decision_threshold: 0.5
+  select_threshold_on_validation: True
+  threshold_selection_objective: hits_lead
+  prediction_batch_size: 64
+  min_validation_event_recall: 0.0
+  min_validation_event_lead_time: 0.0
+
+  batch_size: 64
+  shuffle: False # SAGN consumes chronological batches

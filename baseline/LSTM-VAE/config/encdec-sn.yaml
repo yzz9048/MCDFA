@@ -1,0 +1,49 @@
+model:
+  target: Models.lstm_encdec.model.EncDecAD
+  params:
+    feature_size: 27      # rps + 26 services (the label column is not an input)
+    hidden_size: 64
+    num_layers: 1
+    dropout: 0.0
+
+solver:
+  base_lr: 1.0e-3
+  max_epochs: 100
+  gradient_accumulate_every: 1
+  early_stopping_patience: 15
+  results_folder: ./Checkpoints_encdec_sn
+  scheduler:
+    target: engine.lr_sch.ReduceLROnPlateauWithWarmup
+    params:
+      factor: 0.5
+      patience: 5
+      min_lr: 1.0e-5
+      threshold: 1.0e-4
+      threshold_mode: rel
+      warmup_lr: 1.0e-3
+      warmup: 2
+      verbose: False
+
+dataloader:
+  target: Utils.Data_utils.real_datasets.CustomDataset
+  params:
+    name: sn
+    proportion: 0.6
+    validation_proportion: 0.2
+    data_root: ./Data/sn.csv
+    window: 30
+    DeltaT: 1
+    task: reconstruction
+    normal_only: true
+    feature_scaling: train_minmax
+    save2npy: True
+    neg_one_to_one: True
+    seed: 123
+  batch_size: 64
+  beta: 0.05
+  decision_threshold: null
+  covariance_regularization: 1.0e-3
+  fallback_false_positive_rate: 0.01
+  window_score_reduction: max
+  validation_fit_ratio: 0.5
+  save_point_scores: False
